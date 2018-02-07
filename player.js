@@ -7,19 +7,18 @@ var Player = function(id) {
         p.setAttribute('class','player');
         p.setAttribute('id', 'p' + id);
         document.querySelector('body').appendChild(p);
-        player_obj = document.querySelector('#p' + id);
-        player_obj.style.backgroundColor = getRandomColor();
+        p.style.backgroundColor = getRandomColor();
     }
 
     this.move = function(x,y,self){
-        if(player_obj.style.top == "") {
-            player_obj.style.top = p.getBoundingClientRect().top + 'px';
+        if(p.style.top == "") {
+            p.style.top = p.getBoundingClientRect().top + 'px';
         }
-        if(player_obj.style.left == "") {
-            player_obj.style.left = p.getBoundingClientRect().left + 'px';
+        if(p.style.left == "") {
+            p.style.left = p.getBoundingClientRect().left + 'px';
         }
-        player_obj.style.top = parseFloat(player_obj.style.top) + y + 'px';
-        player_obj.style.left = parseFloat(player_obj.style.left) + x + 'px';
+        p.style.top = parseFloat(p.style.top) + y + 'px';
+        p.style.left = parseFloat(p.style.left) + x + 'px';
         if(self) {
             send(id,x,y);
         }
