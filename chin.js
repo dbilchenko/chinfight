@@ -1,4 +1,4 @@
-var player, players = [];
+var player, players = [], balls = {};
 var peer = new Peer({key: '96h5wn55fu9grpb9'});
 peer.on('error', function(mes) {
     console.log(mes);
@@ -13,6 +13,9 @@ peer.on('connection', function(dataConnection) {
     }
     else if (dataConnection.label == 'rotate') {
         connect_rotate(dataConnection);
+    }
+    else if (dataConnection.label == 'shoot') {
+        connect_shoot(dataConnection);
     }
 });
 
@@ -38,6 +41,12 @@ peer.on('open', function(id) {
         conn_rot.on('open', function() {
             connect_rotate(conn_rot);
         });
+        var conn_shoot = peer.connect(connect_id, {
+            label: 'shoot'
+        });
+        conn_shoot.on('open', function() {
+            connect_shoot(conn_shoot);
+        });
     });
 
     window.addEventListener('keyup', function(event) { 
@@ -49,13 +58,16 @@ peer.on('open', function(id) {
     window.addEventListener('mousemove', function(event) { 
         Mouse.onMove(event);
     }, false);
-    window.addEventListener('click', function(event) { 
+    window.addEventListener('mousedown', function(event) { 
         Mouse.onClick(event);
     }, false);
 
     function loop(timestamp) {
         var progress = timestamp - lastRender;
         player.update();
+        for(var i in balls) {
+            balls[i].update();
+        }
         lastRender = timestamp;
         window.requestAnimationFrame(loop);
     }
@@ -77,6 +89,14 @@ function connect_rotate(c) {
     c.on('data', function(data) {
         if(data.id) {
             players[data.id].rotateGun(data.deg);
+        }
+    });
+}
+
+function connect_shoot(c) {
+    c.on('data', function(data) {
+        if(data.id) {
+            players[data.id].shoot(data.id, data.time, data.deg);
         }
     });
 }

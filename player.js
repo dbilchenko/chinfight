@@ -1,7 +1,9 @@
 var Player = function(id) {
     this.connected = false;
     this.id = id;
-    var player_obj = document.querySelector('#p' + id); 
+    this.balls = {};
+    this.deg;
+    var player_obj = document.querySelector('#p' + id);
     
     if(!player_obj) {
         var p = document.createElement('div');
@@ -62,19 +64,31 @@ var Player = function(id) {
             
             deg = Math.abs(tang - Math.atan(b/a)*180/Math.PI);
         }
+        this.deg = deg;
         gun.style.transform = "rotate("+deg+"deg)";
         if(this.connected) {
             send({id: this.id, deg: deg}, 'rotate');
         }
     }
 
-    this.shoot = function(id, time) {
-        if (!id && !time) {
+    this.shoot = function(id, time, deg) {
+        if (!id && !time && !deg) {
             id = this.id;
             time = new Date().getTime();
+            deg = this.deg;
             Mouse.cl_state = false;
         }
-        var ball = new Ball(id, time);
-        
+        var _this = this;
+        var ball = new Ball(id, time, deg, function() {
+            ball.b.remove();
+            delete _this.balls[id+time];
+        });
+        ball.y = p.offsetTop + 8;
+        ball.x = p.offsetLeft + 10;
+        ball.player = this;
+        balls[id+time] = ball;
+        if(this.connected) {
+            send({id: this.id, time: time, deg: deg}, 'shoot');
+        }
     }
 }

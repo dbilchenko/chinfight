@@ -41,7 +41,7 @@ var Mouse = {
       this._x = event.pageX;
       this._y = event.pageY;
   },
-  onClick: function(event) {
+  onClick: function(event, deg) {
     this.cl_x = event.pageX;
     this.cl_y = event.pageY;
     this.cl_state = true;

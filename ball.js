@@ -1,8 +1,10 @@
-var Ball = function(id, t) {
-    this.connected = false;
+var Ball = function(id, t, deg, cb) {
     this.id = id + t;
-    this.speed = 50;
-    this.dist_traveled = 0;
+    this.speed = 5;
+    this.dist_traveled = 100;
+    this.deg = deg;
+    this.player;
+    this.b;
 
     this.x;
     this.y;
@@ -11,58 +13,31 @@ var Ball = function(id, t) {
     
     if(!ball_obj) {
         var b = document.createElement('div');
+        this.b = b;
         b.setAttribute('class', 'ball');
         b.setAttribute('id', 'b' + id + t);
-        document.querySelector('#p' + id + ' .gun').appendChild(b);
+        document.querySelector('.js_game-field').appendChild(b);
         b.style.backgroundColor = getRandomColor();
-        this.x = b.getBoundingClientRect().x;
-        this.y = b.getBoundingClientRect().y;
     }
 
     this.move = function(x,y){
-        if(p.style.top == "") {
-            p.style.top = this.x + 'px';
+        if(b.style.top == "") {
+            b.style.top = this.y + 'px';
         }
-        if(p.style.left == "") {
-            p.style.left = this.y + 'px';
+        if(b.style.left == "") {
+            b.style.left = this.x + 'px';
         }
-        p.style.top = parseFloat(p.style.top) + y + 'px';
-        p.style.left = parseFloat(p.style.left) + x + 'px';
-        if(this.connected) {
-            //send({id: this.id, x: x, y: y}, 'ball_move');
-        }
+        b.style.top = parseFloat(b.style.top) + y + 'px';
+        b.style.left = parseFloat(b.style.left) + x + 'px';
     }
     
     this.update = function() {
-       
+        if (this.dist_traveled == 0) {
+            cb();
+        }
+        var x = this.speed * Math.cos(this.deg*Math.PI/180);
+        var y = this.speed * Math.sin(this.deg*Math.PI/180);
+        this.move(x, y);
+        this.dist_traveled--;
     };
-
-    this.rotateGun = function(deg) {
-        if (!deg) { 
-            var a, b, tang;
-            var x = p.getBoundingClientRect().x + 10;
-            var y = p.getBoundingClientRect().y + 8;
-            a = Math.abs(Mouse._x - x);
-            b = Math.abs(Mouse._y - y);
-
-            if (Mouse._x > x && Mouse._y > y) {
-                tang = 0;
-            }
-            else if (Mouse._x < x && Mouse._y > y) {
-                tang = 180;
-            }
-            else if (Mouse._x < x && Mouse._y < y) {
-                tang = -180;
-            }
-            else {
-                tang = 360;
-            }
-            
-            deg = Math.abs(tang - Math.atan(b/a)*180/Math.PI);
-        }
-        gun.style.transform = "rotate("+deg+"deg)";
-        if(this.connected) {
-            send({id: this.id, deg: deg}, 'rotate');
-        }
-    }
 }
