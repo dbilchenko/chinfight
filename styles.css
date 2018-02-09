@@ -1,10 +1,27 @@
+.game-field {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    background-color: rgb(224, 199, 199);
+    margin: 0 auto;
+}
 .player {
     position: absolute;
     top:10px;
     left:10px;
     width: 20px;
     height: 20px;
+}
+.player .gun {
+    position: relative;
     background-color: black;
+    width: 26px;
+    height: 6px;
+    display: block;
+    top: 8px;
+    left: 10px;
+    transform: rotate(-105deg);
+    transform-origin: left center;
 }
 
 .show {
@@ -13,4 +30,11 @@
 
 .hide {
     display: none;
+}
+
+.ball {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
 }
