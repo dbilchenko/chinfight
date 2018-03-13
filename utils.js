@@ -32,14 +32,14 @@ var Key = {
 };
 
 var Mouse = {
-  _x: 0,
-  _y: 0,
+  x: 0,
+  y: 0,
   cl_state: false,
   cl_x: 0,
   cl_y: 0,
   onMove: function(event) {
-      this._x = event.pageX;
-      this._y = event.pageY;
+      this.x = event.pageX;
+      this.y = event.pageY;
   },
   onClick: function(event, deg) {
     this.cl_x = event.pageX;
@@ -48,5 +48,30 @@ var Mouse = {
   },
   onClickDelete: function() {
     this.cl_state = false;
+  }
+}
+
+var k = 1;
+
+var Utils = {
+  getDeg: function(o1, o2) {
+    var a, b, tang;
+    a = Math.abs(o1.x - o2.x);
+    b = Math.abs(o1.y - o2.y);
+
+    if (o1.x >= o2.x && o1.y > o2.y) {
+        tang = 0;
+    }
+    else if (o1.x < o2.x && o1.y >= o2.y) {
+        tang = 180;
+    }
+    else if (o1.x < o2.x && o1.y < o2.y) {
+        tang = -180;
+    }
+    else {
+        tang = 360;
+    }
+    
+    return Math.abs(tang - Math.atan(b/a)*180/Math.PI);
   }
 }

@@ -1,4 +1,4 @@
-var player, players = [], balls = {};
+var player, players = [], balls = {}, booms = {};
 var peer = new Peer({key: '96h5wn55fu9grpb9'});
 peer.on('error', function(mes) {
     console.log(mes);
@@ -6,34 +6,42 @@ peer.on('error', function(mes) {
 //document.querySelector('.js_conn-wrapper').classList.toggle("hide");
 
 peer.on('connection', function(dataConnection) {
-    if (dataConnection.label == 'move') {
-        connect(dataConnection);
+    let name_f = 'connect_' + dataConnection.label;
+    if (dataConnection.label == 'init') {
+        connect_init(dataConnection, true);
         document.querySelector('.js_conn-wrapper').classList.toggle("hide");
         player.connected = true;
     }
-    else if (dataConnection.label == 'rotate') {
-        connect_rotate(dataConnection);
-    }
-    else if (dataConnection.label == 'shoot') {
-        connect_shoot(dataConnection);
+    else if (window[name_f]) {
+        window[name_f](dataConnection);
     }
 });
 
 peer.on('open', function(id) {
-    player = new Player(id);
+    player = new Player(id, 10, 10, function() {
+        player.p.remove();
+        player = {update: function(){}};
+    });
     var lastRender = 0;
     document.querySelector('#player_id').innerHTML = id;
 
     document.querySelector('#conn').addEventListener('click', function(){
         var connect_id = document.querySelector('#connect_id').value;
-        var conn = peer.connect(connect_id, {
-            label: 'move'
+        var conn_init = peer.connect(connect_id, {
+            label: 'init',
+            metadata: {x: player.x, y: player.y}
         });
-        conn.on('open', function() {
-            connect(conn);
+        conn_init.on('open', function() {
+            connect_init(conn_init);
             document.querySelector('.js_conn-wrapper').classList.toggle("hide");
             player.connected = true;
-            //document.querySelector('#conn').setAttribute('disabled','disabled');
+            send({id: player.id, x: player.x, y: player.y}, 'init');
+        });
+        var conn_move = peer.connect(connect_id, {
+            label: 'move',
+        });
+        conn_move.on('open', function() {
+            connect_move(conn_move);
         });
         var conn_rot = peer.connect(connect_id, {
             label: 'rotate'
@@ -46,6 +54,18 @@ peer.on('open', function(id) {
         });
         conn_shoot.on('open', function() {
             connect_shoot(conn_shoot);
+        });
+        var conn_boom = peer.connect(connect_id, {
+            label: 'boom'
+        });
+        conn_boom.on('open', function() {
+            connect_boom(conn_boom);
+        });
+        var conn_death = peer.connect(connect_id, {
+            label: 'death'
+        });
+        conn_death.on('open', function() {
+            connect_death(conn_death);
         });
     });
 
@@ -65,8 +85,11 @@ peer.on('open', function(id) {
     function loop(timestamp) {
         var progress = timestamp - lastRender;
         player.update();
-        for(var i in balls) {
+        for(let i in balls) {
             balls[i].update();
+        }
+        for(let i in booms) {
+            booms[i].update();
         }
         lastRender = timestamp;
         window.requestAnimationFrame(loop);
@@ -76,8 +99,19 @@ peer.on('open', function(id) {
 
 });
 
-function connect(c) {
-    players[c.peer] = new Player(c.peer);
+function connect_init(c, need) {
+    c.on('data', function(data) {
+        players[data.id] = new Player(data.id, data.x, data.y, function() {
+            players[data.id].p.remove();
+            delete players[data.id];
+        });
+        if (need) {
+            send({id: player.id, x: player.x, y: player.y}, 'init');
+        }
+    });
+}
+
+function connect_move(c) {
     c.on('data', function(data) {
         if(data.id) {
             players[c.peer].move(data.x, data.y);
@@ -97,6 +131,24 @@ function connect_shoot(c) {
     c.on('data', function(data) {
         if(data.id) {
             players[data.id].shoot(data.id, data.time, data.deg);
+        }
+    });
+}
+
+function connect_boom(c) {
+    c.on('data', function(data) {
+        if(data.id) {
+            players[data.id].boom(data.x, data.y, data.ball, data.time);
+            balls[data.ball.id].b.remove();
+            delete balls[data.ball.id];
+        }
+    });
+}
+
+function connect_death(c) {
+    c.on('data', function(data) {
+        if(data.id) {
+            players[data.id].death(data.time);
         }
     });
 }

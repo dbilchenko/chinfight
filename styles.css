@@ -1,14 +1,19 @@
+:root{
+    --base-top: 10px;
+    --base-left: 10px;
+}
+
 .game-field {
     position: relative;
-    width: 640px;
-    height: 480px;
+    width: 1024px;
+    height: 768px;
     background-color: rgb(224, 199, 199);
     margin: 0 auto;
 }
 .player {
     position: absolute;
-    top:10px;
-    left:10px;
+    top: var(--base-top);
+    left: var(--base-left);
     width: 20px;
     height: 20px;
 }
@@ -37,4 +42,16 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
+}
+
+.boom {
+    width: 30px;
+    position: absolute;
+    z-index: 999;
+}
+
+.death {
+    width: 40px;
+    position: absolute;
+    z-index: 999;
 }
